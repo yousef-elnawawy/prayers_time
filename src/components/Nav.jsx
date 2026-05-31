@@ -41,31 +41,22 @@ export default function Nav() {
       >
         <ul className="flex flex-col gap-4 p-6 text-gray-700 font-medium">
           <li>
-            <a
+            <Link
               className="block py-2 px-3 rounded-lg hover:bg-green-100 hover:text-green-700 transition"
               onClick={() => setOpen(false)}
-              href="/"
+              to="/"
             >
               الرئيسية
-            </a>
+            </Link>
           </li>
           <li>
-            <a
+            <Link
               className="block py-2 px-3 rounded-lg hover:bg-green-100 hover:text-green-700 transition"
               onClick={() => setOpen(false)}
-              href="/"
+              to="/about"
             >
               عن التطبيق
-            </a>
-          </li>
-          <li>
-            <a
-              className="block py-2 px-3 rounded-lg hover:bg-green-100 hover:text-green-700 transition"
-              onClick={() => setOpen(false)}
-              href="/"
-            >
-              اتصل بنا
-            </a>
+            </Link>
           </li>
         </ul>
       </div>
