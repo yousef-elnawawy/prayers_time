@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CgClose } from 'react-icons/cg';
 import { MdMenu } from 'react-icons/md';
+import { Link } from 'react-router-dom';
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -18,9 +19,8 @@ export default function Nav() {
         {/* Desktop Menu */}
         <div className="hidden md:block">
           <ul className="flex gap-6 text-gray-600 font-medium">
-            <li><a className="hover:text-green-600 transition" href="/">الرئيسية</a></li>
-            <li><a className="hover:text-green-600 transition" href="/">عن التطبيق</a></li>
-            <li><a className="hover:text-green-600 transition" href="/">اتصل بنا</a></li>
+            <li><Link className="hover:text-green-600 transition" to="/">الرئيسية</Link></li>
+            <li><Link className="hover:text-green-600 transition" to="/about">عن التطبيق</Link></li>
           </ul>
         </div>
 

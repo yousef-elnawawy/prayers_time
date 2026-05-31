@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('./assets/fonts/Rubik-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
 html{
   direction: rtl;
   scroll-behavior: smooth;

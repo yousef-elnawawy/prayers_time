@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import cities from "../data/cities";
 
 // مكون Prayer
 function Prayer({ img, title, time }) {
@@ -15,17 +16,11 @@ function Prayer({ img, title, time }) {
 
 export default function Home() {
   const [times, setTimes] = useState(null);
+  const [currentTime, setCurrentTime] = useState("");
   const [dateInfo, setDateInfo] = useState({ date: "", hijriDate: "" });
   const [selectedCity, setSelectedCity] = useState("cairo");
-
-const cities = [
-  { displayName: "القاهرة", apiName: "cairo", country: "EG" },
-  { displayName: "الرياض", apiName: "riyadh", country: "SA" },
-  { displayName: "دبي", apiName: "dubai", country: "AE" },
-  { displayName: "بغداد", apiName: "baghdad", country: "IQ" },
-  { displayName: "دمشق", apiName: "damascus", country: "SY" },
-  { displayName: "الرباط", apiName: "rabat", country: "MA" }
-];
+  const [nextPrayer, setNextPrayer] = useState("");
+  const [remainingTime, setRemainingTime] = useState("");
 
 
   const getCityDisplayName = (apiName) => {
@@ -83,6 +78,141 @@ const cities = [
     fetchPrayerTimes();
   }, [selectedCity]);
 
+useEffect(() => {
+  const updateClock = () => {
+    const cityData = cities.find(
+      (city) => city.apiName === selectedCity
+    );
+
+    const time = new Date().toLocaleTimeString("ar-EG", {
+      timeZone: cityData?.timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+
+    setCurrentTime(time);
+  };
+
+  updateClock();
+
+  const interval = setInterval(updateClock, 1000);
+
+  return () => clearInterval(interval);
+}, [selectedCity]);
+
+
+useEffect(() => {
+  if (!times) return;
+
+  const updateNextPrayer = () => {
+    const prayers = [
+      { name: "الفجر", time: times.Fajr },
+      { name: "الظهر", time: times.Dhuhr },
+      { name: "العصر", time: times.Asr },
+      { name: "المغرب", time: times.Maghrib },
+      { name: "العشاء", time: times.Isha }
+    ];
+
+    const now = new Date();
+
+    let found = false;
+
+    for (let prayer of prayers) {
+      const [hours, minutes] = prayer.time
+        .split(":")
+        .map(Number);
+
+      const prayerDate = new Date();
+
+      prayerDate.setHours(hours);
+      prayerDate.setMinutes(minutes);
+      prayerDate.setSeconds(0);
+
+      if (prayerDate > now) {
+        found = true;
+
+        const diff = prayerDate - now;
+
+        const hoursLeft = Math.floor(
+          diff / 1000 / 60 / 60
+        );
+
+        const minutesLeft = Math.floor(
+          (diff / 1000 / 60) % 60
+        );
+
+        const secondsLeft = Math.floor(
+          (diff / 1000) % 60
+        );
+
+        setNextPrayer(prayer.name);
+
+        setRemainingTime(
+          `${hoursLeft
+            .toString()
+            .padStart(2, "0")}:${minutesLeft
+            .toString()
+            .padStart(2, "0")}:${secondsLeft
+            .toString()
+            .padStart(2, "0")}`
+        );
+
+        break;
+      }
+    }
+
+    // لو خلصت كل الصلوات → الفجر بكرة
+    if (!found) {
+      const [hours, minutes] = times.Fajr
+        .split(":")
+        .map(Number);
+
+      const fajrDate = new Date();
+
+      fajrDate.setDate(fajrDate.getDate() + 1);
+
+      fajrDate.setHours(hours);
+      fajrDate.setMinutes(minutes);
+      fajrDate.setSeconds(0);
+
+      const diff = fajrDate - now;
+
+      const hoursLeft = Math.floor(
+        diff / 1000 / 60 / 60
+      );
+
+      const minutesLeft = Math.floor(
+        (diff / 1000 / 60) % 60
+      );
+
+      const secondsLeft = Math.floor(
+        (diff / 1000) % 60
+      );
+
+      setNextPrayer("الفجر");
+
+      setRemainingTime(
+        `${hoursLeft
+          .toString()
+          .padStart(2, "0")}:${minutesLeft
+          .toString()
+          .padStart(2, "0")}:${secondsLeft
+          .toString()
+          .padStart(2, "0")}`
+      );
+    }
+  };
+
+  updateNextPrayer();
+
+  const interval = setInterval(updateNextPrayer, 1000);
+
+  return () => clearInterval(interval);
+}, [times]);
+
+
+
   // 🕐 دالة تحويل من 24 إلى 12 ساعة
 const convertTo12Hour = (time24) => {
   if (!time24) return "...";
@@ -98,9 +228,11 @@ const convertTo12Hour = (time24) => {
       <h2 className="text-2xl text-gray-700 font-semibold mb-4">
         مرحبًا بك في تطبيق مواقيت الصلاة
       </h2>
-      <hr className="border-green-700" />
-      <br />
-      <div className="flex justify-center items-center">
+      <div className="flex justify-between items-center">
+      <p className="text-3xl text-emerald-700 font-bold mt-2">
+  {currentTime}
+</p>
+<div>
         <select
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
@@ -113,6 +245,22 @@ const convertTo12Hour = (time24) => {
           ))}
         </select>
       </div>
+      </div>
+    <br />
+    <hr className="border-green-700" />
+
+<div className="mt-4">
+  <p className="text-xl text-gray-700">
+    الصلاة القادمة:
+    <span className="text-emerald-700 font-bold">
+      {" "}{nextPrayer}
+    </span>
+  </p>
+
+  <p className="text-3xl font-bold text-green-800 mt-2">
+    متبقي {remainingTime}
+  </p>
+</div>
       <br />
       <hr className="border-green-700" />
       <br />
